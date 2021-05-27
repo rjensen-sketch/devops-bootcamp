@@ -11,7 +11,7 @@ describe('roll', async () => {
     await request(app).get('/roll')
         .expect((res) => {
           res.status.should.equal(200);
-          res.text.should.match(/^A die with 6 sides just rolled a \d\./);
+          res.text.should.match(/^Two dice each with 6 sides just rolled a \d and \d\./);
         });
   });
 
@@ -22,7 +22,7 @@ describe('roll', async () => {
       await request(app).get('/roll?sides=13')
           .expect((res) => {
             res.status.should.equal(200);
-            res.text.should.match(/^A die with 13 sides just rolled a \d{1,2}\./);
+            res.text.should.match(/^Two dice each with 13 sides just rolled a \d{1,2} and \d{1,2}\./);
             // console.log(res.text);
           });
     }
@@ -34,17 +34,17 @@ describe('roll', async () => {
     const rollResult = await request(app).get('/roll?sides=13')
         .expect(async (res) => {
           res.status.should.equal(200);
-          res.text.should.match(/A die with 13 sides just rolled a/);
+          res.text.should.match(/^Two dice each with 13 sides just rolled a (\d+)/);
         });
 
     // query database for result & perform assertions
     let rollHistories = await db.any('SELECT * FROM roll_history;');
     // console.log(rollHistories);
-    rollHistories.length.should.equal(1);
+    rollHistories.length.should.equal(2);
 
     // assert result
     const resultMessage = rollResult.res.text;
-    let rollMatch = resultMessage.match(/A die with 13 sides just rolled a (\d+)/);
+    let rollMatch = resultMessage.match(/^Two dice each with 13 sides just rolled a (\d+)/);
     // console.log(rollMatch[1]);
     rollHistories[0].result.toString().should.equal(rollMatch[1]);
   });
